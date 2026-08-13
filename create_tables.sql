@@ -1,8 +1,10 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS tb_chave_natural;
 DROP TABLE IF EXISTS tb_execucao;
 DROP TABLE IF EXISTS tb_execucao_dtl;
 DROP TABLE IF EXISTS tb_execucao_dtl_v2;
+DROP TABLE IF EXISTS tb_execucao_dtl_v3;
 DROP TABLE IF EXISTS tb_tipo_mov;
 DROP TABLE IF EXISTS tb_fami;
 DROP TABLE IF EXISTS tb_plat;
