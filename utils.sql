@@ -62,12 +62,43 @@ from (
 select * from tb_execucao_agg
 
 
+
 EXPLAIN FORMAT=JSON
 	select
+		texec.dt_mov,
+		texec.cod_tipo_mov,
+		tdtl.cod_ctpt,
+		tdtl.cod_plat,
+		tdtl.cod_fami,
+		tdtl.cod_estr,
+		tdtl.cod_ativ_base,
+		tdtl.cod_ativ_cota,
+		count(1) as qtde,
+		sum(tdtl.num_qtde) as num_qtde,
+		avg(tdtl.vlr_unit) as vlr_unit,
+		GROUP_CONCAT(texec.cod_exec) 
+	from test.tb_execucao texec
+	inner join test.tb_execucao_dtl tdtl
+		on texec.cod_exec  = tdtl.cod_exec 
+	group by 
+		texec.dt_mov,
+		texec.cod_tipo_mov,
+		tdtl.cod_ctpt,
+		tdtl.cod_plat,
+		tdtl.cod_fami,
+		tdtl.cod_estr,
+		tdtl.cod_ativ_base,
+		tdtl.cod_ativ_cota
+		
+	
+		
+	
+select
+		dt_mov,
+		cod_tipo_mov,
 		cod_ctpt,
 		cod_plat,
 		cod_fami,
-		cod_tipo_mov,
 		cod_estr,
 		cod_ativ_base,
 		cod_ativ_cota,
@@ -75,19 +106,64 @@ EXPLAIN FORMAT=JSON
 		sum(num_qtde) as num_qtde,
 		avg(vlr_unit) as vlr_unit,
 		GROUP_CONCAT(cod_exec) 
-	from test.tb_execucao 
+	from tb_execucao_dtl_v2
 	group by 
+		dt_mov,
+		cod_tipo_mov,
 		cod_ctpt,
 		cod_plat,
 		cod_fami,
-		cod_tipo_mov,
 		cod_estr,
 		cod_ativ_base,
 		cod_ativ_cota
+	
+select * from tb_chave_natural
 		
-	
-	
-	ANALYZE TABLE tb_execucao;
+
+select 
+	tkey.dt_mov,
+	tkey.cod_tipo_mov,
+	tkey.cod_ctpt,
+	tkey.cod_plat,
+	tkey.cod_fami,
+	tkey.cod_estr,
+	tkey.cod_ativ_base,
+	tkey.cod_ativ_cota, 
+	tval.qtde,
+	tval.num_qtde,
+	tval.vlr_unit,
+	tval.cod_execs
+from tb_chave_natural tkey
+inner join (
+	select
+		cod_chave,
+		count(1) as qtde,
+		sum(num_qtde) as num_qtde,
+		avg(vlr_unit) as vlr_unit,
+		GROUP_CONCAT(cod_exec) as cod_execs
+	from tb_execucao_dtl_v3 
+	group by 
+		cod_chave
+) tval
+ON tkey.cod_chave = tval.cod_chave
+
+select
+		cod_chave,
+		count(1) as qtde,
+		sum(num_qtde) as num_qtde,
+		avg(vlr_unit) as vlr_unit,
+		GROUP_CONCAT(cod_exec) 
+	from tb_execucao_dtl_v3 
+	group by 
+		cod_chave
+		
+
+		select * from tb_execucao
+		
+		update tb_execucao_dtl_v2
+		set dt_mov = '2026-06-12'
+		
+		
 	
 select
 	cod_ctpt,
