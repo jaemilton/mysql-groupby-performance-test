@@ -1,10 +1,11 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS tb_chave_natural;
+DROP TABLE IF EXISTS tb_contrato;
 DROP TABLE IF EXISTS tb_execucao;
 DROP TABLE IF EXISTS tb_execucao_dtl;
 DROP TABLE IF EXISTS tb_execucao_dtl_v2;
 DROP TABLE IF EXISTS tb_execucao_dtl_v3;
+DROP TABLE IF EXISTS tb_chave_natural;
 DROP TABLE IF EXISTS tb_tipo_mov;
 DROP TABLE IF EXISTS tb_fami;
 DROP TABLE IF EXISTS tb_plat;
@@ -14,22 +15,22 @@ DROP TABLE IF EXISTS tb_ativ;
 SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE tb_ctpt (
-    cod_ctpt INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cod_ctpt INT NOT NULL PRIMARY KEY,
     nom_ctpt VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE tb_plat (
-    cod_plat INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cod_plat INT NOT NULL PRIMARY KEY,
     nom_plat VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE tb_fami (
-    cod_fami INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cod_fami INT NOT NULL PRIMARY KEY,
     nom_fami VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE tb_tipo_mov (
-    cod_tipo_mov INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cod_tipo_mov INT NOT NULL PRIMARY KEY,
     nom_tipo_mov VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -39,7 +40,7 @@ CREATE TABLE tb_ativ (
 
 
 CREATE TABLE tb_chave_natural (
-    cod_chave INT NOT NULL PRIMARY KEY,
+    cod_chave INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     cod_tipo_mov INT NOT NULL,
     dt_mov DATE NOT NULL,
     cod_ctpt INT NOT NULL,
@@ -47,7 +48,7 @@ CREATE TABLE tb_chave_natural (
     cod_fami INT NOT NULL,
     cod_estr INT NULL,
     cod_ativ_base VARCHAR(10) NOT NULL,
-    cod_ativ_cota VARCHAR(10) NOT NULL,
+    cod_ativ_cota VARCHAR(10) NULL,
     CONSTRAINT fk_chave_natural_tipo_mov FOREIGN KEY (cod_tipo_mov) REFERENCES tb_tipo_mov(cod_tipo_mov),
     CONSTRAINT fk_chave_natural_ctpt FOREIGN KEY (cod_ctpt) REFERENCES tb_ctpt(cod_ctpt),
     CONSTRAINT fk_chave_natural_plat FOREIGN KEY (cod_plat) REFERENCES tb_plat(cod_plat),
@@ -60,6 +61,13 @@ CREATE TABLE tb_chave_natural (
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE tb_contrato (
+    cod_ctrt INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cod_chave INT NOT NULL,
+    txt_obs nvarchar(100) NOT NULL,
+    CONSTRAINT fk_contrato_chave FOREIGN KEY (cod_chave) REFERENCES tb_chave_natural(cod_chave)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 CREATE TABLE tb_execucao
@@ -69,7 +77,10 @@ CREATE TABLE tb_execucao
     cod_tipo_mov INT NOT NULL,
     cod_oper_orig CHAR(20) NOT NULL,
     dt_mov DATE NOT NULL,
-    CONSTRAINT fk_execucao_tipo_mov FOREIGN KEY (cod_tipo_mov) REFERENCES tb_tipo_mov(cod_tipo_mov)
+    cod_ctrt INT NULL,
+    CONSTRAINT fk_execucao_tipo_mov FOREIGN KEY (cod_tipo_mov) REFERENCES tb_tipo_mov(cod_tipo_mov),
+    CONSTRAINT fk_execucao_cod_ctrt FOREIGN KEY (cod_ctrt) REFERENCES tb_contrato(cod_ctrt)
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -80,7 +91,7 @@ CREATE TABLE tb_execucao_dtl (
     cod_fami INT NOT NULL,
     cod_estr INT NULL,
     cod_ativ_base VARCHAR(10) NOT NULL,
-    cod_ativ_cota VARCHAR(10) NOT NULL,
+    cod_ativ_cota VARCHAR(10) NULL,
     num_qtde DECIMAL(28,18) NOT NULL,
     vlr_unit DECIMAL(28,18) NOT NULL,
     CONSTRAINT fk_execucao_exec FOREIGN KEY (cod_exec) REFERENCES tb_execucao(cod_exec),
@@ -107,7 +118,7 @@ CREATE TABLE tb_execucao_dtl_v2 (
     cod_fami INT NOT NULL,
     cod_estr INT NULL,
     cod_ativ_base VARCHAR(10) NOT NULL,
-    cod_ativ_cota VARCHAR(10) NOT NULL,
+    cod_ativ_cota VARCHAR(10) NULL,
     num_qtde DECIMAL(28,18) NOT NULL,
     vlr_unit DECIMAL(28,18) NOT NULL,
     CONSTRAINT fk_execucao_v2_tipo_mov FOREIGN KEY (cod_tipo_mov) REFERENCES tb_tipo_mov(cod_tipo_mov),
@@ -146,26 +157,21 @@ INSERT INTO tb_ativ (cod_ativ) VALUES
 	 ('USDC'),
 	 ('USDT');
 
-INSERT INTO tb_ctpt (nom_ctpt) VALUES
-	 ('COINBASE'),
-	 ('GALAXY'),
-	 ('HIDDEN_ROAD'),
-	 ('OKX');
+INSERT INTO tb_ctpt (cod_ctpt, nom_ctpt) VALUES
+	 (1, 'COINBASE');
 
-INSERT INTO tb_fami (nom_fami) VALUES
-	 ('SPOT'),
-	 ('FUTUROS_PERPETUOS');
+INSERT INTO tb_fami (cod_fami, nom_fami) VALUES
+	 (1, 'SPOT'),
+	 (2, 'FUTUROS_PERPETUOS');
 
 
-INSERT INTO tb_plat (nom_plat) VALUES
-	 ('COINBASE'),
-	 ('GALAXY'),
-	 ('HIDDEN_ROAD');
+INSERT INTO tb_plat (cod_plat, nom_plat) VALUES
+	 (1, 'COINBASE');
 
-INSERT INTO tb_tipo_mov (nom_tipo_mov) VALUES
-	 ('Compra'),
-	 ('Venda'),
-	 ('Trading Fee');
+INSERT INTO tb_tipo_mov (cod_tipo_mov, nom_tipo_mov) VALUES
+	 (1, 'Compra'),
+	 (2, 'Venda'),
+	 (3, 'Trading Fee');
 
 
 ALTER TABLE tb_execucao AUTO_INCREMENT = 10000000;
